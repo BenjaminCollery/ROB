@@ -3,39 +3,53 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 
+
 class KNN:
     def __init__(self, k):
         self.k = k
+
+    def _predict(self, x):
+        i_k = np.argpartition(self._distance(x), self.k)[:self.k]
+        return np.argmax(np.bincount(y[i_k]))
+
+    def _distance(self, x):
+        return np.sqrt(np.sum((self.x-x)**2, axis=1))
 
     def fit(self, x, y):
         self.x = x
         self.y = y
 
-    def dist(self):
-        return np.sqrt((self.x-self.y)**2)
+    def predict(self, x):
+        return np.array([self._predict(el) for el in x])
 
-    def predict(self, y):
-        dist = dist()
-        argdist = np.argpartition(dist , k)[:k]
-        return np.bincount(y[argdist])
+    def score(self, x, y):
+        y_pred = self.predict(x)
+        return 100*sum(y_pred == y)/len(y)
+
+
+def load_data():
+    data = pd.read_csv("breast-cancer-wisconsin.data",
+                       header=None,
+                       na_values="?")
+    data.dropna(inplace=True)
+    for col in data.columns:
+        data[col] = data[col].astype(int)
+    x = data.values[:, 1:10]
+    y = data.values[:, 10]
+
+    return x, y
+
 
 ####################
 if __name__ == "__main__":
-    data = pd.read_csv("breast-cancer-wisconsin.data")
-    print(data)
-    x = data.values[1:10]
-    y = data.values[10]
-    x_train , y_train , x_test , y_test = train_test_split(x , y)
+    x, y = load_data()
+    x_train, x_test, y_train, y_test = train_test_split(x, y)
 
     k = 10
 
-    knn = knn(k)
+    knn = KNN(k)
     knn.fit(x_train, y_train)
-    y_pred = knn.predict(y_test[0])
+    acc = knn.score(x_test, y_test)
+    print(f"Accuracy:  {acc:.4}%")
 
-    print("y_test :")
-    print(y_test[0])
-    print("y_pred :")
-    print(y_pred)
-
-### david.octavian.iacob@gmail.com
+# david.octavian.iacob@gmail.com
