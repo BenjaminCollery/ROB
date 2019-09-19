@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#! /usr/bin/env python
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,6 +7,7 @@ import sys
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn.utils.multiclass import unique_labels
+
 
 class KNN:
     # fonction qui permet d initialiser la classe
@@ -44,7 +45,9 @@ class KNN:
         y_pred = self.predict(x)
         return 100*sum(y_pred == y)/len(y)
 
-# permet de charger les donnees suivant le data_set passer en argument de la ligne de commande
+
+# permet de charger les donnees suivant le data_set passer en argument de la
+# ligne de commande
 # inputs : path, le path vers le data_set
 def load_data(path):
     data = pd.read_csv(path,
@@ -57,13 +60,14 @@ def load_data(path):
     if "haberman" in path:
         x = data.values[:, 0:3]
         y = data.values[:, 3]
-        class_names = [1,2]
+        class_names = [1, 2]
     else:
         x = data.values[:, 1:10]
         y = data.values[:, 10]
-        class_names = [2,4]
+        class_names = [2, 4]
 
     return x, y, class_names
+
 
 # code venant d un exemple fourni par sklearn
 def plot_confusion_matrix(y_true, y_pred, classes,
@@ -113,10 +117,12 @@ def plot_confusion_matrix(y_true, y_pred, classes,
     plt.show()
     return ax
 
+
 # affiche la matrice de confusion et ......
 def plots(y_true, y_pred):
     plot_confusion_matrix(y_test, y_pred, classes=class_names,
-                      title='Confusion matrix, without normalization')
+                          title='Confusion matrix, without normalization')
+
 
 ####################
 if __name__ == "__main__":
