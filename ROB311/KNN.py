@@ -10,6 +10,9 @@ from sklearn.utils.multiclass import unique_labels
 
 
 class KNN:
+    """
+    Class implementing the k-nearest neighbor algorithm.
+    """
     # fonction qui permet d initialiser la classe
     # inputs : k, nombre de voisins pris en compte dans la methode
     def __init__(self, k):
@@ -46,13 +49,15 @@ class KNN:
         return 100*sum(y_pred == y)/len(y)
 
 
-# permet de charger les donnees suivant le data_set passer en argument de la
-# ligne de commande
-# inputs : path, le path vers le data_set
+# permet de charger le dataset Breast cancer Wisconsin
 def load_breast_cancer_wisconsin():
+    """Load the Breast cancer Wisconsin dataset."""
     data = pd.read_csv("breast-cancer-wisconsin.data",
                        header=None,
-                       na_values="?")
+                       na_values="?"
+    )
+
+    # Fix wrong types
     data.dropna(inplace=True)
     for col in data.columns:
         data[col] = data[col].astype(int)
@@ -63,15 +68,23 @@ def load_breast_cancer_wisconsin():
     return x, y
 
 def load_haberman():
+    """Load the Haberman dataset."""
     data = pd.read_csv("haberman.data")
     x = data.values[:, 0:3]
     y = data.values[:, 3]
 
     return x, y
 
-def plot_confusion_matrix(x, y, class_names):
+def plot_confusion_matrix(y_true, y_pred, class_names):
+    """
+    Plot a confusion matrix
+    Input:
+        y_true: array of true labels
+        y_pred: array predicted labels
+        class_names: list of all class names
+    """
     plt.title("Confusion matrix")
-    ax = sns.heatmap(confusion_matrix(y_test, y_pred),
+    ax = sns.heatmap(confusion_matrix(y_true, y_pred),
                      cmap=plt.cm.Blues,
                      annot=True,
                      fmt="d",
@@ -100,19 +113,27 @@ if __name__ == "__main__":
     )
     # Confusion matrix
     plt.subplot(2, 2, 1)
-    plot_confusion_matrix(x, y, class_names)
+    plot_confusion_matrix(y_test, y_pred, class_names)
+
+    # Plots
+    hue = [f"Class {y}" for y in y_test]
     plt.subplot(2, 2, 2)
     plt.title("Feature 1 vs 5")
-    ax = sns.scatterplot(x_test[:,1], x_test[:,5], hue=y_test)
+    ax = sns.scatterplot(x_test[:,1], x_test[:,5], hue=hue)
     ax.set(xlabel="Feature 1", ylabel="Feature 5")
+    # The two classes does not overlap on this plot.
+    # It explain the high accuracy on this dataset.
     plt.subplot(2, 2, 3)
     plt.title("Feature 1 vs 2")
-    ax = sns.scatterplot(x_test[:,1], x_test[:,2], hue=y_test)
+    ax = sns.scatterplot(x_test[:,1], x_test[:,2], hue=hue)
     ax.set(xlabel="Feature 1", ylabel="Feature 2")
     plt.subplot(2, 2, 4)
     plt.title("Feature 1 vs 5")
-    ax = sns.scatterplot(x_test[:,1], x_test[:,5], hue=y_test==y_pred)
+    hue2 = ["True prediction" if y_test[i]==y_pred[i] else "Wrong prediction"
+            for i in range(len(y_test))]
+    ax = sns.scatterplot(x_test[:,1], x_test[:,5], hue=hue2)
     ax.set(xlabel="Feature 1", ylabel="Feature 5")
+    # The misclassified points are those on the edge between the two classes.
 
     # Haberman dataset
     x, y = load_haberman()
@@ -130,18 +151,23 @@ if __name__ == "__main__":
     )
     # Confusion matrix
     plt.subplot(2, 2, 1)
-    plot_confusion_matrix(x, y, class_names)
+    plot_confusion_matrix(y_test, y_pred, class_names)
+
+    # Plots
+    hue = [f"Class {y}" for y in y_test]
     plt.subplot(2, 2, 2)
     plt.title("Feature 0 vs 1")
-    ax = sns.scatterplot(x_test[:,0], x_test[:,1], hue=y_test)
-    ax.set(xlabel="Feature 1", ylabel="Feature 5")
+    ax = sns.scatterplot(x_test[:,0], x_test[:,1], hue=hue)
+    ax.set(xlabel="Feature 0", ylabel="Feature 1")
     plt.subplot(2, 2, 3)
     plt.title("Feature 1 vs 2")
-    ax = sns.scatterplot(x_test[:,1], x_test[:,2], hue=y_test)
-    ax.set(xlabel="Feature 1", ylabel="Feature 5")
+    ax = sns.scatterplot(x_test[:,1], x_test[:,2], hue=hue)
+    ax.set(xlabel="Feature 1", ylabel="Feature 2")
     plt.subplot(2, 2, 4)
     plt.title("Feature 0 vs 2")
-    ax = sns.scatterplot(x_test[:,0], x_test[:,2], hue=y_test)
-    ax.set(xlabel="Feature 1", ylabel="Feature 5")
+    ax = sns.scatterplot(x_test[:,0], x_test[:,2], hue=hue)
+    ax.set(xlabel="Feature 0", ylabel="Feature 2")
+    # In all the plots the two classes overlap. It explains why knn performs
+    # worse on this dataset than on the previous one.
 
     plt.show()
