@@ -1,11 +1,11 @@
 #! /usr/bin/env python
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-import sys
+import numpy as np
+import pandas as pd
+import seaborn as sns
 
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import train_test_split
 from sklearn.utils.multiclass import unique_labels
 
 
@@ -49,97 +49,99 @@ class KNN:
 # permet de charger les donnees suivant le data_set passer en argument de la
 # ligne de commande
 # inputs : path, le path vers le data_set
-def load_data(path):
-    data = pd.read_csv(path,
+def load_breast_cancer_wisconsin():
+    data = pd.read_csv("breast-cancer-wisconsin.data",
                        header=None,
                        na_values="?")
     data.dropna(inplace=True)
     for col in data.columns:
         data[col] = data[col].astype(int)
 
-    if "haberman" in path:
-        x = data.values[:, 0:3]
-        y = data.values[:, 3]
-        class_names = [1, 2]
-    else:
-        x = data.values[:, 1:10]
-        y = data.values[:, 10]
-        class_names = [2, 4]
+    x = data.values[:, 1:10]
+    y = data.values[:, 10]
 
-    return x, y, class_names
+    return x, y
 
+def load_haberman():
+    data = pd.read_csv("haberman.data")
+    x = data.values[:, 0:3]
+    y = data.values[:, 3]
 
-# code venant d un exemple fourni par sklearn
-def plot_confusion_matrix(y_true, y_pred, classes,
-                          normalize=False,
-                          title=None,
-                          cmap=plt.cm.Blues):
-    """
-    This function prints and plots the confusion matrix.
-    Normalization can be applied by setting `normalize=True`.
-    """
-    if not title:
-        if normalize:
-            title = 'Normalized confusion matrix'
-        else:
-            title = 'Confusion matrix, without normalization'
+    return x, y
 
-    # Compute confusion matrix
-    cm = confusion_matrix(y_true, y_pred)
-    if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+def plot_confusion_matrix(x, y, class_names):
+    plt.title("Confusion matrix")
+    ax = sns.heatmap(confusion_matrix(y_test, y_pred),
+                     cmap=plt.cm.Blues,
+                     annot=True,
+                     fmt="d",
+                     xticklabels=class_names,
+                     yticklabels=class_names
+    )
+    ax.set(xlabel="True label", ylabel="Predicted label")
 
-    fig, ax = plt.subplots()
-    im = ax.imshow(cm, interpolation='nearest', cmap=cmap)
-    ax.figure.colorbar(im, ax=ax)
-    # We want to show all ticks...
-    ax.set(xticks=np.arange(cm.shape[1]),
-           yticks=np.arange(cm.shape[0]),
-           # ... and label them with the respective list entries
-           xticklabels=classes, yticklabels=classes,
-           title=title,
-           ylabel='True label',
-           xlabel='Predicted label')
-
-    # Rotate the tick labels and set their alignment.
-    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-             rotation_mode="anchor")
-
-    # Loop over data dimensions and create text annotations.
-    fmt = '.2f' if normalize else 'd'
-    thresh = cm.max() / 2.
-    for i in range(cm.shape[0]):
-        for j in range(cm.shape[1]):
-            ax.text(j, i, format(cm[i, j], fmt),
-                    ha="center", va="center",
-                    color="white" if cm[i, j] > thresh else "black")
-    fig.tight_layout()
-    plt.show()
     return ax
 
 
-# affiche la matrice de confusion et ......
-def plots(y_true, y_pred):
-    plot_confusion_matrix(y_test, y_pred, classes=class_names,
-                          title='Confusion matrix, without normalization')
-
-
-####################
 if __name__ == "__main__":
-    data_set_path = sys.argv[1]
-    x, y, class_names = load_data(data_set_path)
+    # Brest cancer Wisconsin dataset
+    x, y = load_breast_cancer_wisconsin()
+    class_names = [2, 4]
     x_train, x_test, y_train, y_test = train_test_split(x, y)
-
-    k = 6
-
-    knn = KNN(k)
+    knn = KNN(6)
     knn.fit(x_train, y_train)
     acc = knn.score(x_test, y_test)
-
     y_pred = knn.predict(x_test)
 
-    print(f"Accuracy:  {acc:.4}%")
+    fig = plt.figure(f"Breast cancer Wisconsin dataset (accuracy={acc:.4}%)")
+    plt.subplots_adjust(
+        hspace=0.5,
+        wspace=0.5
+    )
+    # Confusion matrix
+    plt.subplot(2, 2, 1)
+    plot_confusion_matrix(x, y, class_names)
+    plt.subplot(2, 2, 2)
+    plt.title("Feature 1 vs 5")
+    ax = sns.scatterplot(x_test[:,1], x_test[:,5], hue=y_test)
+    ax.set(xlabel="Feature 1", ylabel="Feature 5")
+    plt.subplot(2, 2, 3)
+    plt.title("Feature 1 vs 2")
+    ax = sns.scatterplot(x_test[:,1], x_test[:,2], hue=y_test)
+    ax.set(xlabel="Feature 1", ylabel="Feature 2")
+    plt.subplot(2, 2, 4)
+    plt.title("Feature 1 vs 5")
+    ax = sns.scatterplot(x_test[:,1], x_test[:,5], hue=y_test==y_pred)
+    ax.set(xlabel="Feature 1", ylabel="Feature 5")
 
-    plots(y_test, y_pred)
+    # Haberman dataset
+    x, y = load_haberman()
+    class_names = [1, 2]
+    x_train, x_test, y_train, y_test = train_test_split(x, y)
+    knn = KNN(6)
+    knn.fit(x_train, y_train)
+    acc = knn.score(x_test, y_test)
+    y_pred = knn.predict(x_test)
 
-# david.octavian.iacob@gmail.com
+    plt.figure(f"Haberman dataset(accuracy={acc:.4}%)")
+    plt.subplots_adjust(
+        hspace=0.5,
+        wspace=0.5
+    )
+    # Confusion matrix
+    plt.subplot(2, 2, 1)
+    plot_confusion_matrix(x, y, class_names)
+    plt.subplot(2, 2, 2)
+    plt.title("Feature 0 vs 1")
+    ax = sns.scatterplot(x_test[:,0], x_test[:,1], hue=y_test)
+    ax.set(xlabel="Feature 1", ylabel="Feature 5")
+    plt.subplot(2, 2, 3)
+    plt.title("Feature 1 vs 2")
+    ax = sns.scatterplot(x_test[:,1], x_test[:,2], hue=y_test)
+    ax.set(xlabel="Feature 1", ylabel="Feature 5")
+    plt.subplot(2, 2, 4)
+    plt.title("Feature 0 vs 2")
+    ax = sns.scatterplot(x_test[:,0], x_test[:,2], hue=y_test)
+    ax.set(xlabel="Feature 1", ylabel="Feature 5")
+
+    plt.show()
