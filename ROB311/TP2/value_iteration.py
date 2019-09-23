@@ -5,15 +5,35 @@ import numpy as np
 def close_enough(V, Vp, theta):
     """
     Check if |V(S)-Vp(S)| < theta for all S.
-    """
+
+    :param V: An array
+    :param Vp: Another array
+    :type V: numpy.ndarray
+    :type Vp: numpy.ndarray
+    :return: Whether V and Vp are close close enough
+    :rtype: bool"""
     return np.max(np.abs(V - Vp)) < theta
 
 def value_iteration(S, A, P, R, theta, gama):
     """
     Implementation of the value iteration algorithm.
+
+    :param S: The set of states
+    :param A: The set of actions
+    :param P: The transition matricies
+    :param theta: Precision of the result
+    :param gama: The gama parameter
+    :type S: numpy.ndarray
+    :type A: numpy.ndarray
+    :type P: numpy.ndarray
+    :type theta: float
+    :type gama: float
+    :returns: The utility of each state and the optimal policy
+    :rtype: (numpy.ndarray, numpy.ndarray)
     """
     V = np.zeros(S.shape)
     Vp = (1+theta)*np.ones(S.shape)
+    # Compute iteratively the utility function
     while not close_enough(V, Vp, theta):
         V = Vp
         for s in S:
@@ -23,6 +43,7 @@ def value_iteration(S, A, P, R, theta, gama):
                     X[a] += np.sum(P[a][s][sp]*V[sp])
             Vp[s] = R[s] + gama*np.max(X)
 
+    # Compute the optimal policy for each state
     pi = np.zeros(S.shape[0])
     for s in S:
         X = np.zeros(A.shape[0])
@@ -62,5 +83,5 @@ if __name__ == "__main__":
     theta = 1e-3
 
     V, pi = value_iteration(S, A, P, R, theta, gama)
-    print(V)
-    print(pi)
+    print("Utility of each state: ", V)
+    print("Optimal policy for each state: ", pi)
