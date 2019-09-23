@@ -34,23 +34,19 @@ def value_iteration(S, A, P, R, theta, gama):
     V = np.zeros(S.shape)
     Vp = (1+theta)*np.ones(S.shape)
     # Compute iteratively the utility function
+    X = np.zeros((S.shape[0], A.shape[0]))
     while not close_enough(V, Vp, theta):
         V = Vp
         for s in S:
-            X = np.zeros(A.shape[0])
             for a in A:
-                for sp in S:
-                    X[a] += np.sum(P[a][s][sp]*V[sp])
-            Vp[s] = R[s] + gama*np.max(X)
-
+                X[s][a] = P[a][s]@V.reshape((-1, 1))
+        Vp = R + gama*np.max(X, axis=1)
     # Compute the optimal policy for each state
-    pi = np.zeros(S.shape[0])
+    X = np.zeros((S.shape[0], A.shape[0]))
     for s in S:
-        X = np.zeros(A.shape[0])
         for a in A:
-            for sp in S:
-                X[a] += np.sum(P[a][s][sp]*V[sp])
-        pi[s] = np.argmax(X)
+            X[s][a] += P[a][s]@V.reshape((-1, 1))
+    pi = np.argmax(X, axis=1)
 
     return V, pi
 
