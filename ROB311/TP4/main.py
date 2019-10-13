@@ -16,10 +16,10 @@ from sklearn.svm import SVC
 if __name__ == "__main__":
     t0 = time.time()
     print("Loading the dataset...", end="")
-    X_train = pd.read_feather("mnist_train.feather")
+    X_train = pd.read_csv("mnist_train.csv")
     y_train = X_train["label"]
     X_train.drop("label", axis="columns", inplace=True)
-    X_test = pd.read_feather("mnist_test.feather")
+    X_test = pd.read_csv("mnist_test.csv")
     y_test = X_test["label"]
     X_test.drop("label", axis="columns", inplace=True)
     print("\tOk")
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     print("Training the model...", end="")
     pipe = Pipeline([
         ("transformer", Normalizer()),
-        ("classifier", SVC(gamma="scale"))])
+        ("classifier", SVC(gamma="scale", C=10))])
     pipe.fit(X_train, y_train)
     print("\tOk")
 
